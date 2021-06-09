@@ -13,7 +13,7 @@ Available packages:
 
 Usage
 -------------
-```
+```php
 use Wb\PdfToPpm\PdfToPpm;
 $pdfToPpm = PdfToPpm::create();
 // $result is an instance of \FilesystemIterator
@@ -25,6 +25,12 @@ $result3 = $pdfToPpm->convertPdf('path/to/pdf', 'path/to/other/destination/dir/t
 
 // Set specific resolution
 $result4 = $pdfToPpm->convertPdf('path/to/pdf', 'path/to/other/destination/dir/then/tmp', true, 300);
+
+// Set filename (skips generating random directory),
+// 'ExampleFileName' will return 'ExampleFileName-1.png', 'ExampleFileName-2.png' files.
+$filename = 'ExampleFileName';
+$result5 = $pdfToPpm->convertPdf('path/to/pdf', 'path/to/other/destination/dir/then/tmp', true, 300, $filename);
+
 
 ```
 

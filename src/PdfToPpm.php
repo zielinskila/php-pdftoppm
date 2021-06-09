@@ -1,10 +1,11 @@
 <?php
 /*
 * (c) Waarneembemiddeling.nl
+* forked by SLZ
 *
 * For the full copyright and license information, please view the LICENSE
 * file that was distributed with this source code.
-*/ 
+*/
 
 namespace Wb\PdfToPpm;
 
@@ -35,7 +36,7 @@ class PdfToPpm extends AbstractBinary
      * @return \FilesystemIterator
      * @throws Exception\RuntimeException
      */
-    public function convertPdf($inputPdf, $destinationRootFolder = null, $saveAsPng = false, $resolution = null)
+    public function convertPdf($inputPdf, $destinationRootFolder = null, $saveAsPng = false, $resolution = null, $filename = null)
     {
         if (false === is_file($inputPdf)) {
             throw new RuntimeException(sprintf('Input file "%s" not found', $inputPdf));
@@ -53,12 +54,14 @@ class PdfToPpm extends AbstractBinary
             throw new RuntimeException(sprintf('Destination folder "%s" is not writable', $destinationRootFolder));
         }
 
-        $destinationFolder = $this->getDestinationDir($destinationRootFolder);
-        if (! $this->createDirectory($destinationFolder)) {
-            throw new RuntimeException(sprintf('Destination folder "%s" could not be created', $destinationFolder));
+        $destinationFolder = $this->getDestinationDir($destinationRootFolder, $filename);
+        if (null === $filename) {
+            if (!$this->createDirectory($destinationFolder)) {
+                throw new RuntimeException(sprintf('Destination folder "%s" could not be created', $destinationFolder));
+            }
         }
 
-        $options = $this->buildOptions($inputPdf, $destinationFolder, $saveAsPng, $resolution);
+        $options = $this->buildOptions($inputPdf, $destinationFolder, $saveAsPng, $filename, $resolution);
 
         try {
             $this->command($options);
@@ -74,9 +77,13 @@ class PdfToPpm extends AbstractBinary
         return mkdir($destinationFolder);
     }
 
-    private function getDestinationDir($destinationRootFolder)
+    private function getDestinationDir($destinationRootFolder, $filename)
     {
-        return $destinationRootFolder . '/' . uniqid('pdftoppm').'/';
+        if (null === $filename) {
+            return $destinationRootFolder . '/' . uniqid('pdftoppm') . '/';
+        }
+        // SLZ change
+        return $destinationRootFolder;
     }
 
     /**
@@ -84,7 +91,7 @@ class PdfToPpm extends AbstractBinary
      * @param $inputPdf
      * @param null $destinationRootFolder
      */
-    private function buildOptions($inputPdf, $destinationFolder, $saveAsPng, $resolution = null)
+    private function buildOptions($inputPdf, $destinationFolder, $saveAsPng, $filename, $resolution = null)
     {
         $options = array();
 
@@ -98,7 +105,7 @@ class PdfToPpm extends AbstractBinary
         }
 
         $options[] = $inputPdf;
-        $options[] = $destinationFolder;
+        $options[] = $destinationFolder.$filename;
 
         return $options;
     }
